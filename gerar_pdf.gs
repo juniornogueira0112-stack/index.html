@@ -3,10 +3,19 @@ function doPost(e) {
     if (!e || !e.postData || !e.postData.contents) {
       return ContentService.createTextOutput(JSON.stringify({status: "erro", message: "Nenhum dado recebido"}))
         .setMimeType(ContentService.MimeType.JSON)
-        .setHeader("Access-Control-Allow-Origin", "*");
+        .setHeader("Access-Control-Allow-Origin", "*")
+        .setHeader("Access-Control-Allow-Methods", "POST, OPTIONS")
+        .setHeader("Access-Control-Allow-Headers", "Content-Type");
     }
 
     var dados = JSON.parse(e.postData.contents);
+
+    // ✅ FORMATA DATA PARA PADRÃO BRASIL
+    var dataFormatada = dados.data;
+    if (dataFormatada) {
+      var partes = dataFormatada.split("-");
+      dataFormatada = partes[2] + "/" + partes[1] + "/" + partes[0];
+    }
 
     // 🧾 Monta HTML do PDF com layout parecido com o app
     var html = `
@@ -18,7 +27,7 @@ function doPost(e) {
         </tr>
         <tr>
           <td><b>Cidade:</b> ${dados.cidade}</td>
-          <td><b>Data do Pedido:</b> ${dados.data}</td>
+          <td><b>Data do Pedido:</b> ${dataFormatada}</td>
         </tr>
         <tr>
           <td><b>Vendedor:</b> ${dados.vendedor}</td>
@@ -43,6 +52,7 @@ function doPost(e) {
     `;
 
     var total = 0;
+
     dados.itens.forEach(function(item) {
       var totalItem = item.qtd * item.preco;
       total += totalItem;
@@ -76,11 +86,25 @@ function doPost(e) {
 
     return ContentService.createTextOutput(JSON.stringify({status: "ok", message: "PDF criado"}))
       .setMimeType(ContentService.MimeType.JSON)
-      .setHeader("Access-Control-Allow-Origin", "*");
+      .setHeader("Access-Control-Allow-Origin", "*")
+      .setHeader("Access-Control-Allow-Methods", "POST, OPTIONS")
+      .setHeader("Access-Control-Allow-Headers", "Content-Type");
 
   } catch (erro) {
     return ContentService.createTextOutput(JSON.stringify({status: "erro", message: erro.message}))
       .setMimeType(ContentService.MimeType.JSON)
-      .setHeader("Access-Control-Allow-Origin", "*");
+      .setHeader("Access-Control-Allow-Origin", "*")
+      .setHeader("Access-Control-Allow-Methods", "POST, OPTIONS")
+      .setHeader("Access-Control-Allow-Headers", "Content-Type");
   }
+}
+
+// ✅ ESSENCIAL PRA FUNCIONAR NO NAVEGADOR (CORS)
+function doOptions(e) {
+  return ContentService
+    .createTextOutput("")
+    .setMimeType(ContentService.MimeType.JSON)
+    .setHeader("Access-Control-Allow-Origin", "*")
+    .setHeader("Access-Control-Allow-Methods", "POST, OPTIONS")
+    .setHeader("Access-Control-Allow-Headers", "Content-Type");
 }
