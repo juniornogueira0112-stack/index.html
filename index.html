@@ -1,22 +1,133 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html>
 <head>
   <title>Pedido</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <style>
-    body { font-family: Arial; padding: 15px; background: #f5f5f5; }
-    h2 { text-align: center; }
-    input, textarea { padding: 8px; font-size: 16px; box-sizing: border-box; }
-    .linha { display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
-    .linha .campo { flex: 1; }
-    .produto { background: white; padding: 10px; margin-bottom: 8px; border-radius: 8px; display: flex; flex-direction: column; }
-    .direita { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
-    .qtd { width: 60px; }
-    .valorItem { min-width: 80px; font-weight: bold; color: green; }
-    .total { font-size: 20px; font-weight: bold; text-align: center; margin-top: 15px; }
-    button { width: 100%; padding: 15px; background: green; color: white; font-size: 18px; border: none; border-radius: 8px; }
-    textarea { resize: vertical; min-height: 60px; width: 100%; margin-top: 6px; }
+    body { 
+      font-family: Arial; 
+      padding: 15px; 
+      background: #f5f5f5; 
+    }
+
+    h2 { 
+      text-align: center; 
+      margin-bottom: 20px;
+    }
+
+    input, textarea { 
+      padding: 10px; 
+      font-size: 16px; 
+      box-sizing: border-box; 
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      width: 100%;
+    }
+
+    .linha { 
+      display: flex; 
+      gap: 10px; 
+      margin-bottom: 10px; 
+      flex-wrap: wrap; 
+    }
+
+    .linha .campo { 
+      flex: 1; 
+      min-width: 140px;
+    }
+
+    /* PRODUTOS */
+    .produto { 
+      background: white; 
+      padding: 12px; 
+      margin-bottom: 12px; 
+      border-radius: 10px; 
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .produto-topo {
+      margin-bottom: 8px;
+    }
+
+    .produto-topo b {
+      font-size: 14px;
+    }
+
+    .produto-topo label {
+      font-size: 12px;
+      display: block;
+      margin-top: 4px;
+    }
+
+    .produto-topo input[type="number"] {
+      width: 120px;
+      margin-top: 6px;
+    }
+
+    .direita { 
+      display: flex; 
+      align-items: center; 
+      gap: 10px; 
+      margin-top: 10px; 
+    }
+
+    .qtd { 
+      width: 70px; 
+      text-align: center;
+    }
+
+    .valorItem { 
+      flex: 1;
+      font-weight: bold; 
+      color: green; 
+      text-align: right;
+      font-size: 16px;
+    }
+
+    .total { 
+      font-size: 22px; 
+      font-weight: bold; 
+      text-align: center; 
+      margin-top: 20px; 
+    }
+
+    button { 
+      width: 100%; 
+      padding: 15px; 
+      background: green; 
+      color: white; 
+      font-size: 18px; 
+      border: none; 
+      border-radius: 10px; 
+      margin-top: 10px;
+    }
+
+    textarea { 
+      resize: vertical; 
+      min-height: 60px; 
+      margin-top: 6px; 
+    }
+
+    /* MOBILE AJUSTE FINO */
+    @media (max-width: 600px) {
+      .linha {
+        flex-direction: column;
+      }
+
+      .direita {
+        justify-content: space-between;
+      }
+
+      .valorItem {
+        font-size: 18px;
+      }
+
+      button {
+        font-size: 16px;
+      }
+    }
+
   </style>
 </head>
 
@@ -48,34 +159,37 @@
   Total: <span id="total">R$ 0,00</span>
 </div>
 
-<br>
 <button onclick="enviarPedido()">FINALIZAR PEDIDO</button>
+<button onclick="limparPedido()" style="background:#888;">
+  LIMPAR PEDIDO
+</button>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
+  
 const listaProdutos = [
-  { codigo: "85", nome: "Vela 5F CX 24x8 (7898269580370)", preco: 2.99 },
-  { codigo: "03", nome: "Vela N3 24x8 (7898269580011)", preco: 4.99 },
-  { codigo: "05", nome: "Vela N5 24x8 (7898269580028)", preco: 6.42 },
-  { codigo: "08", nome: "Vela N8 24x8 (7898269580035)", preco: 8.25 },
-  { codigo: "07", nome: "Vela Votiva Fina 24x1 (7898269580042)", preco: 9.95 },
-  { codigo: "17", nome: "Vela Votiva Fina Imagem 24x1 (7898269580448)", preco: 9.95 },
-  { codigo: "04", nome: "Vela N4 24x8 (7898269580059)", preco: 7.20 },
-  { codigo: "06", nome: "Vela N6 24x8 (7898269580066)", preco: 8.25 },
-  { codigo: "09", nome: "Vela N9 24x8 (7898269580073)", preco: 10.07 },
-  { codigo: "10", nome: "Vela N10 24x6 (7898269580103)", preco: 13.06 },
-  { codigo: "12", nome: "Vela N12 24x6 (7898269580097)", preco: 15.03 },
-  { codigo: "27", nome: "Vela 7 Dias Grossa 24x1 (7898269580080)", preco: 12.42 },
-  { codigo: "37", nome: "Vela 7 Dias Grossa Imagem 24x1 (7898269580196)", preco: 12.42 },
-  { codigo: "15", nome: "Vela N5 Colorida 24x8", preco: 0.00 },
-  { codigo: "67", nome: "Vela Votiva Fina Colorida 24x1", preco: 0.00 },
-  { codigo: "55", nome: "Vela N5 Bicolor 24x8", preco: 7.55 },
-  { codigo: "68", nome: "Vela Votiva Fina Bicolor 24x1", preco: 11.67 },
-  { codigo: "77", nome: "Vela Votiva Fina 7 Linhas 24x1", preco: 14.10 },
-  { codigo: "60", nome: "Vela Votiva Fina Mel 24x1 (7898269580226)", preco: 11.68 },
-  { codigo: "80", nome: "Vela Citronela 24x1 (7898269580318)", preco: 8.25 },
-  { codigo: "90", nome: "Velas por Quilo Branca ou Colorida", preco: 34.60 }
+  { codigo: "85", nome: "Vela 5F CX 24x8 (7898269580370)", preco: 15.0 },
+  { codigo: "03", nome: "Vela N3 24x8 (7898269580011)", preco: 10.0 },
+  { codigo: "05", nome: "Vela N5 24x8 (7898269580028)", preco: 11.0 },
+  { codigo: "08", nome: "Vela N8 24x8 (7898269580035)", preco: 13.5 },
+  { codigo: "07", nome: "Vela Votiva Fina 24x1 (7898269580042)", preco: 5.0 },
+  { codigo: "17", nome: "Vela Votiva Fina Imagem 24x1 (7898269580448)", preco: 6.0 },
+  { codigo: "04", nome: "Vela N4 24x8 (7898269580059)", preco: 9.5 },
+  { codigo: "06", nome: "Vela N6 24x8 (7898269580066)", preco: 12.0 },
+  { codigo: "09", nome: "Vela N9 24x8 (7898269580073)", preco: 14.0 },
+  { codigo: "10", nome: "Vela N10 24x6 (7898269580103)", preco: 12.5 },
+  { codigo: "12", nome: "Vela N12 24x6 (7898269580097)", preco: 16.0 },
+  { codigo: "27", nome: "Vela 7 Dias Grossa 24x1 (7898269580080)", preco: 7.0 },
+  { codigo: "37", nome: "Vela 7 Dias Grossa Imagem 24x1 (7898269580196)", preco: 8.0 },
+  { codigo: "15", nome: "Vela N5 Colorida 24x8", preco: 11.5 },
+  { codigo: "67", nome: "Vela Votiva Fina Colorida 24x1", preco: 6.5 },
+  { codigo: "55", nome: "Vela N5 Bicolor 24x8", preco: 12.0 },
+  { codigo: "68", nome: "Vela Votiva Fina Bicolor 24x1", preco: 7.0 },
+  { codigo: "77", nome: "Vela Votiva Fina 7 Linhas 24x1", preco: 8.0 },
+  { codigo: "60", nome: "Vela Votiva Fina Mel 24x1 (7898269580226)", preco: 7.5 },
+  { codigo: "80", nome: "Vela Citronela 24x1 (7898269580318)", preco: 9.0 },
+  { codigo: "90", nome: "Velas por Quilo Branca ou Colorida", preco: 50.0 }
 ];
 
 const produtosComCampoExtra = ["17","37","15","55","67","68","90"];
@@ -99,16 +213,64 @@ function formatarMoeda(valor) {
   return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
+function togglePreco(i) {
+  const campo = document.getElementById(`preco_${i}`);
+  campo.disabled = !campo.disabled;
+}
+
+function limparPedido() {
+  if (!confirm("Tem certeza que deseja limpar o pedido?")) return;
+
+  // Campos principais
+  document.getElementById("cliente").value = "";
+  document.getElementById("doc").value = "";
+  document.getElementById("vendedor").value = "";
+  document.getElementById("cidade").value = "";
+  document.getElementById("data").value = "";
+  document.getElementById("pagamento").value = "";
+  document.getElementById("observacoes").value = "";
+
+  // Produtos
+  listaProdutos.forEach((p, i) => {
+    document.getElementById(`qtd_${i}`).value = 0;
+    document.getElementById(`valor_${i}`).innerText = "R$ 0,00";
+
+    const campoObs = document.getElementById(`obs_${i}`);
+    if (campoObs) campoObs.value = "";
+  });
+
+  // Total
+  document.getElementById("total").innerText = "R$ 0,00";
+}
+
 function renderProdutos() {
   const div = document.getElementById("produtos");
   div.innerHTML = "";
   listaProdutos.forEach((p, i) => {
     const campoExtra = produtosComCampoExtra.includes(p.codigo)
-      ? `<textarea placeholder="Informações adicionais" id="obs_${i}"></textarea>` 
+      ? `<textarea placeholder="Informações adicionais" id="obs_${i}"></textarea>`
       : "";
     div.innerHTML += `
       <div class="produto">
-        <div><b>${p.codigo}</b> - ${p.nome}<br>${formatarMoeda(p.preco)}${campoExtra}</div>
+        <div>
+  <b>${p.codigo}</b> - ${p.nome}<br>
+
+  <label style="font-size:12px;">
+    <input type="checkbox" onchange="togglePreco(${i})"> Alterar preço
+  </label><br>
+
+  <input 
+    type="number" 
+    id="preco_${i}" 
+    value="${p.preco}" 
+    step="0.01"
+    disabled
+    style="width:100px; margin-top:4px;"
+    onchange="calcularTotal()"
+  >
+
+  ${campoExtra}
+</div>
         <div class="direita">
           <input class="qtd" type="number" min="0" value="0" onchange="calcularTotal()" id="qtd_${i}">
           <span class="valorItem" id="valor_${i}">R$ 0,00</span>
@@ -122,7 +284,8 @@ function calcularTotal() {
   let total = 0;
   listaProdutos.forEach((p, i) => {
     const qtd = Number(document.getElementById(`qtd_${i}`).value);
-    const totalItem = qtd * p.preco;
+    const preco = Number(document.getElementById(`preco_${i}`).value);
+    const totalItem = qtd * preco;
     document.getElementById(`valor_${i}`).innerText = formatarMoeda(totalItem);
     total += totalItem;
   });
@@ -185,7 +348,15 @@ async function enviarPedido() {
       const qtd = Number(document.getElementById(`qtd_${i}`).value);
       if(qtd>0){
         const obsExtra = document.getElementById(`obs_${i}`) ? document.getElementById(`obs_${i}`).value : "";
-        itens.push({codigo:p.codigo,nome:p.nome,qtd,preco:p.preco,obsExtra});
+        const preco = Number(document.getElementById(`preco_${i}`).value);
+
+    itens.push({
+      codigo:p.codigo,
+      nome:p.nome,
+      qtd,
+      preco,
+      obsExtra
+    });
       }
     });
 
@@ -195,9 +366,9 @@ async function enviarPedido() {
 
     gerarPDF(pedido);
 
-    // Chamada para o Apps Script Web App
-    await fetch("https://script.google.com/macros/s/AKfycbwC1SDbEN4uu8-bRy0TfbjrBtlfVVWwqb2RTwAx44-HzTmvTENo8c5UYD19bFoDZD1M/exec",{
+    await fetch("https://script.google.com/macros/s/AKfycbwfkegXj_ZUuqTOE_lrC_E31-YNsQp6euznpBy02ab6unrcfheiu9_r78-9pM0YWncZ/exec",{
       method:"POST",
+      mode:"no-cors",
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify(pedido)
     });
