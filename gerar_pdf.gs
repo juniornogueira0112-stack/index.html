@@ -1,8 +1,9 @@
 function doPost(e) {
   try {
     if (!e || !e.postData || !e.postData.contents) {
-      return ContentService.createTextOutput("Erro: Nenhum dado recebido")
-        .setMimeType(ContentService.MimeType.TEXT);
+      return ContentService.createTextOutput(JSON.stringify({status: "erro", message: "Nenhum dado recebido"}))
+        .setMimeType(ContentService.MimeType.JSON)
+        .setHeader("Access-Control-Allow-Origin", "*");
     }
 
     var dados = JSON.parse(e.postData.contents);
@@ -46,7 +47,6 @@ function doPost(e) {
       var totalItem = item.qtd * item.preco;
       total += totalItem;
 
-      // Inclui observações extras do item, se houver
       var obsItem = item.obsExtra && item.obsExtra.trim() !== "" 
         ? `<br><small>Observações: ${item.obsExtra}</small>` 
         : "";
@@ -74,10 +74,13 @@ function doPost(e) {
     var nomeArquivo = "Pedido_" + dados.cliente + "_" + new Date().getTime() + ".pdf";
     pasta.createFile(blob).setName(nomeArquivo);
 
-    return ContentService.createTextOutput("OK").setMimeType(ContentService.MimeType.TEXT);
+    return ContentService.createTextOutput(JSON.stringify({status: "ok", message: "PDF criado"}))
+      .setMimeType(ContentService.MimeType.JSON)
+      .setHeader("Access-Control-Allow-Origin", "*");
 
   } catch (erro) {
-    return ContentService.createTextOutput("Erro: " + erro.message)
-      .setMimeType(ContentService.MimeType.TEXT);
+    return ContentService.createTextOutput(JSON.stringify({status: "erro", message: erro.message}))
+      .setMimeType(ContentService.MimeType.JSON)
+      .setHeader("Access-Control-Allow-Origin", "*");
   }
 }
