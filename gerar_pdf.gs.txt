@@ -1,0 +1,83 @@
+function doPost(e) {
+  try {
+    if (!e || !e.postData || !e.postData.contents) {
+      return ContentService.createTextOutput("Erro: Nenhum dado recebido")
+        .setMimeType(ContentService.MimeType.TEXT);
+    }
+
+    var dados = JSON.parse(e.postData.contents);
+
+    // 🧾 Monta HTML do PDF com layout parecido com o app
+    var html = `
+      <h2>INFORMAÇÕES DO CLIENTE</h2>
+      <table width="100%" style="border-collapse: collapse;">
+        <tr>
+          <td><b>Cliente:</b> ${dados.cliente}</td>
+          <td><b>CPF/CNPJ:</b> ${dados.doc}</td>
+        </tr>
+        <tr>
+          <td><b>Cidade:</b> ${dados.cidade}</td>
+          <td><b>Data do Pedido:</b> ${dados.data}</td>
+        </tr>
+        <tr>
+          <td><b>Vendedor:</b> ${dados.vendedor}</td>
+          <td><b>Forma de Pagamento:</b> ${dados.pagamento}</td>
+        </tr>
+        <tr>
+          <td colspan="2"><b>Observações gerais:</b> ${dados.observacoes || "-"}</td>
+        </tr>
+      </table>
+
+      <hr>
+
+      <h2>PEDIDO</h2>
+      <table border="1" width="100%" style="border-collapse: collapse; text-align: center;">
+        <tr>
+          <th>Código</th>
+          <th>Produto</th>
+          <th>Qtd</th>
+          <th>Valor Unit</th>
+          <th>Total</th>
+        </tr>
+    `;
+
+    var total = 0;
+    dados.itens.forEach(function(item) {
+      var totalItem = item.qtd * item.preco;
+      total += totalItem;
+
+      // Inclui observações extras do item, se houver
+      var obsItem = item.obsExtra && item.obsExtra.trim() !== "" 
+        ? `<br><small>Observações: ${item.obsExtra}</small>` 
+        : "";
+
+      html += `
+        <tr>
+          <td>${item.codigo}</td>
+          <td>${item.nome}${obsItem}</td>
+          <td>${item.qtd}</td>
+          <td>R$ ${item.preco.toFixed(2)}</td>
+          <td>R$ ${totalItem.toFixed(2)}</td>
+        </tr>
+      `;
+    });
+
+    html += `
+      </table>
+      <h2 style="text-align: right;">TOTAL DO PEDIDO: R$ ${total.toFixed(2)}</h2>
+    `;
+
+    // 📄 Converte HTML em PDF
+    var blob = Utilities.newBlob(html, "text/html").getAs("application/pdf");
+
+    var pasta = DriveApp.getFolderById("1kfdYGluqmcFjCozsO097vo7hoguVdm-2");
+    var nomeArquivo = "Pedido_" + dados.cliente + "_" + new Date().getTime() + ".pdf";
+    pasta.createFile(blob).setName(nomeArquivo);
+
+    return ContentService.createTextOutput("OK").setMimeType(ContentService.MimeType.TEXT);
+
+  } catch (erro) {
+    return ContentService.createTextOutput("Erro: " + erro.message)
+      .setMimeType(ContentService.MimeType.TEXT);
+  }
+}

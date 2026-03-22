@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Pedido</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    body { font-family: Arial; padding: 15px; background: #f5f5f5; }
+    h2 { text-align: center; }
+    input, textarea { padding: 8px; font-size: 16px; box-sizing: border-box; }
+    .linha { display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+    .linha .campo { flex: 1; }
+    .produto { background: white; padding: 10px; margin-bottom: 8px; border-radius: 8px; display: flex; flex-direction: column; }
+    .direita { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+    .qtd { width: 60px; }
+    .valorItem { min-width: 80px; font-weight: bold; color: green; }
+    .total { font-size: 20px; font-weight: bold; text-align: center; margin-top: 15px; }
+    button { width: 100%; padding: 15px; background: green; color: white; font-size: 18px; border: none; border-radius: 8px; }
+    textarea { resize: vertical; min-height: 60px; width: 100%; margin-top: 6px; }
+  </style>
+</head>
+
+<body>
+
+<h2>Pedido</h2>
+
+<div class="linha">
+  <input class="campo" id="cliente" placeholder="Nome/Razão Social do Cliente">
+  <input class="campo" id="doc" placeholder="CPF/CNPJ" oninput="formatarDocumento(this)">
+</div>
+
+<div class="linha">
+  <input class="campo" id="vendedor" placeholder="Nome do vendedor">
+  <input class="campo" id="cidade" placeholder="Cidade">
+</div>
+
+<div class="linha">
+  <input class="campo" id="data" type="date" placeholder="Data do Pedido">
+  <input class="campo" id="pagamento" placeholder="Forma de Pagamento">
+</div>
+
+<h3>Produtos</h3>
+<div id="produtos"></div>
+
+<textarea id="observacoes" placeholder="Observações gerais (opcional)"></textarea>
+
+<div class="total">
+  Total: <span id="total">R$ 0,00</span>
+</div>
+
+<br>
+<button onclick="enviarPedido()">FINALIZAR PEDIDO</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+const listaProdutos = [
+  { codigo: "85", nome: "Vela 5F CX 24x8 (7898269580370)", preco: 2.99 },
+  { codigo: "03", nome: "Vela N3 24x8 (7898269580011)", preco: 4.99 },
+  { codigo: "05", nome: "Vela N5 24x8 (7898269580028)", preco: 6.42 },
+  { codigo: "08", nome: "Vela N8 24x8 (7898269580035)", preco: 8.25 },
+  { codigo: "07", nome: "Vela Votiva Fina 24x1 (7898269580042)", preco: 9.95 },
+  { codigo: "17", nome: "Vela Votiva Fina Imagem 24x1 (7898269580448)", preco: 9.95 },
+  { codigo: "04", nome: "Vela N4 24x8 (7898269580059)", preco: 7.20 },
+  { codigo: "06", nome: "Vela N6 24x8 (7898269580066)", preco: 8.25 },
+  { codigo: "09", nome: "Vela N9 24x8 (7898269580073)", preco: 10.07 },
+  { codigo: "10", nome: "Vela N10 24x6 (7898269580103)", preco: 13.06 },
+  { codigo: "12", nome: "Vela N12 24x6 (7898269580097)", preco: 15.03 },
+  { codigo: "27", nome: "Vela 7 Dias Grossa 24x1 (7898269580080)", preco: 12.42 },
+  { codigo: "37", nome: "Vela 7 Dias Grossa Imagem 24x1 (7898269580196)", preco: 12.42 },
+  { codigo: "15", nome: "Vela N5 Colorida 24x8", preco: 0.00 },
+  { codigo: "67", nome: "Vela Votiva Fina Colorida 24x1", preco: 0.00 },
+  { codigo: "55", nome: "Vela N5 Bicolor 24x8", preco: 7.55 },
+  { codigo: "68", nome: "Vela Votiva Fina Bicolor 24x1", preco: 11.67 },
+  { codigo: "77", nome: "Vela Votiva Fina 7 Linhas 24x1", preco: 14.10 },
+  { codigo: "60", nome: "Vela Votiva Fina Mel 24x1 (7898269580226)", preco: 11.68 },
+  { codigo: "80", nome: "Vela Citronela 24x1 (7898269580318)", preco: 8.25 },
+  { codigo: "90", nome: "Velas por Quilo Branca ou Colorida", preco: 34.60 }
+];
+
+const produtosComCampoExtra = ["17","37","15","55","67","68","90"];
+
+function formatarDocumento(campo) {
+  let valor = campo.value.replace(/\D/g, '');
+  if (valor.length <= 11) { 
+    valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
+    valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
+    valor = valor.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+  } else { 
+    valor = valor.replace(/^(\d{2})(\d)/, '$1.$2');
+    valor = valor.replace(/^(\d{2}\.\d{3})(\d)/, '$1.$2');
+    valor = valor.replace(/^(\d{2}\.\d{3}\.\d{3})(\d)/, '$1/$2');
+    valor = valor.replace(/(\d{4})(\d{1,2})$/, '$1-$2');
+  }
+  campo.value = valor;
+}
+
+function formatarMoeda(valor) {
+  return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+function renderProdutos() {
+  const div = document.getElementById("produtos");
+  div.innerHTML = "";
+  listaProdutos.forEach((p, i) => {
+    const campoExtra = produtosComCampoExtra.includes(p.codigo)
+      ? `<textarea placeholder="Informações adicionais" id="obs_${i}"></textarea>`
+      : "";
+    div.innerHTML += `
+      <div class="produto">
+        <div><b>${p.codigo}</b> - ${p.nome}<br>${formatarMoeda(p.preco)}${campoExtra}</div>
+        <div class="direita">
+          <input class="qtd" type="number" min="0" value="0" onchange="calcularTotal()" id="qtd_${i}">
+          <span class="valorItem" id="valor_${i}">R$ 0,00</span>
+        </div>
+      </div>
+    `;
+  });
+}
+
+function calcularTotal() {
+  let total = 0;
+  listaProdutos.forEach((p, i) => {
+    const qtd = Number(document.getElementById(`qtd_${i}`).value);
+    const totalItem = qtd * p.preco;
+    document.getElementById(`valor_${i}`).innerText = formatarMoeda(totalItem);
+    total += totalItem;
+  });
+  document.getElementById("total").innerText = formatarMoeda(total);
+}
+
+function gerarPDF(pedido) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.setFontSize(16);
+  doc.text(`Pedido - ${pedido.cliente}`, 10, 20);
+  doc.setFontSize(12);
+  const partesData = pedido.data.split("-");
+  const dataBR = `${partesData[2]}/${partesData[1]}/${partesData[0]}`;
+  doc.text(`Data: ${dataBR}`, 10, 30);;
+  doc.text(`CPF/CNPJ: ${pedido.doc}`, 10, 36);
+  doc.text(`Vendedor: ${pedido.vendedor}`, 10, 42);
+  doc.text(`Cidade: ${pedido.cidade}`, 10, 48);
+  doc.text(`Pagamento: ${pedido.pagamento}`, 10, 54);
+
+  let y = 64;
+  doc.text('Itens:', 10, y);
+  y += 6;
+
+  pedido.itens.forEach(item => {
+    doc.text(`${item.qtd} x ${item.nome} - ${formatarMoeda(item.preco*item.qtd)}`, 12, y);
+    y += 6;
+    if(item.obsExtra && item.obsExtra.trim() !== "") {
+      doc.text(`Observações: ${item.obsExtra}`, 14, y);
+      y += 6;
+    }
+  });
+
+  y += 6;
+  doc.text(`Total: ${formatarMoeda(pedido.itens.reduce((acc,i)=>acc+i.preco*i.qtd,0))}`, 10, y+6);
+
+  if(pedido.observacoes){
+    y += 12;
+    doc.text(`Observações gerais: ${pedido.observacoes}`, 10, y);
+  }
+
+  doc.save(`Pedido_${pedido.cliente}.pdf`);
+}
+
+async function enviarPedido() {
+  try {
+    const cliente = document.getElementById("cliente").value.trim();
+    if(!cliente){alert("O campo Nome/Razão Social do Cliente é obrigatório!"); return;}
+    const dataPedido = document.getElementById("data").value;
+    if(!dataPedido){alert("O campo Data é obrigatório!"); return;}
+
+    const docCampo = document.getElementById("doc").value;
+    const vendedor = document.getElementById("vendedor").value;
+    const cidade = document.getElementById("cidade").value;
+    const pagamento = document.getElementById("pagamento").value;
+    const observacoes = document.getElementById("observacoes").value;
+
+    const itens = [];
+    listaProdutos.forEach((p,i)=>{
+      const qtd = Number(document.getElementById(`qtd_${i}`).value);
+      if(qtd>0){
+        const obsExtra = document.getElementById(`obs_${i}`) ? document.getElementById(`obs_${i}`).value : "";
+        itens.push({codigo:p.codigo,nome:p.nome,qtd,preco:p.preco,obsExtra});
+      }
+    });
+
+    if(itens.length===0){alert("Selecione pelo menos um produto."); return;}
+
+    const pedido={cliente,doc:docCampo,vendedor,cidade,pagamento,data:dataPedido,observacoes,itens};
+
+    gerarPDF(pedido);
+
+    await fetch("https://script.google.com/macros/s/AKfycbwC1SDbEN4uu8-bRy0TfbjrBtlfVVWwqb2RTwAx44-HzTmvTENo8c5UYD19bFoDZD1M/exec",{
+      method:"POST",
+      mode:"no-cors",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(pedido)
+    });
+
+    alert("Pedido enviado e PDF gerado com sucesso!");
+  }catch(erro){alert("Erro: "+erro);}
+}
+
+// Inicializa
+renderProdutos();
+</script>
+</body>
+</html>
