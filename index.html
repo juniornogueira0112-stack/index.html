@@ -219,7 +219,6 @@ function togglePreco(i) {
   const campo = document.getElementById(`preco_${i}`);
   campo.disabled = !campo.disabled;
 }
-
 function limparPedido() {
   if (!confirm("Tem certeza que deseja limpar o pedido?")) return;
 
@@ -234,9 +233,22 @@ function limparPedido() {
 
   // Produtos
   listaProdutos.forEach((p, i) => {
+    // Zera quantidade
     document.getElementById(`qtd_${i}`).value = 0;
+
+    // Zera valor do item
     document.getElementById(`valor_${i}`).innerText = "R$ 0,00";
 
+    // Restaura o preço original
+    const campoPreco = document.getElementById(`preco_${i}`);
+    campoPreco.value = p.preco;
+    campoPreco.disabled = true;
+
+    // Desmarca "Alterar preço"
+    const checkbox = campoPreco.closest(".produto").querySelector('input[type="checkbox"]');
+    if (checkbox) checkbox.checked = false;
+
+    // Limpa informações adicionais
     const campoObs = document.getElementById(`obs_${i}`);
     if (campoObs) campoObs.value = "";
   });
@@ -244,7 +256,6 @@ function limparPedido() {
   // Total
   document.getElementById("total").innerText = "R$ 0,00";
 }
-
 function renderProdutos() {
   const div = document.getElementById("produtos");
   div.innerHTML = "";
