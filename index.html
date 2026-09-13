@@ -349,7 +349,6 @@ doc.text("Velas Três Colinas", 78, 22);
   doc.text(`Cliente: ${pedido.cliente}`, 10, 55);
   doc.text(`Cidade: ${pedido.cidade}`, 10, 62);
   doc.text(`Vendedor: ${pedido.vendedor}`, 10, 69);
-  doc.text(`Observações gerais: ${pedido.observacoes || "-"}`, 10, 76);
 
   // COLUNA DIREITA
   doc.text(`CPF/CNPJ: ${pedido.doc}`, 110, 55);
@@ -411,9 +410,11 @@ doc.autoTable({
 
   theme: "grid"
 });
-
+  
   // ===== TOTAL =====
   const total = pedido.itens.reduce((acc, i) => acc + i.preco * i.qtd, 0);
+
+  const posicaoTotal = doc.lastAutoTable.finalY + 15;
 
   doc.setFontSize(14);
   doc.setFont(undefined, "bold");
@@ -421,10 +422,34 @@ doc.autoTable({
   doc.text(
     `TOTAL DO PEDIDO: R$ ${total.toFixed(2)}`,
     200,
-    doc.lastAutoTable.finalY + 15,
+    posicaoTotal,
     { align: "right" }
   );
 
+  // ===== OBSERVAÇÕES GERAIS =====
+  if (pedido.observacoes && pedido.observacoes.trim() !== "") {
+
+    const posicaoObservacao = posicaoTotal + 12;
+
+    doc.setFontSize(11);
+    doc.setFont(undefined, "bold");
+
+    doc.text("OBSERVAÇÕES GERAIS:", 10, posicaoObservacao);
+
+    doc.setFont(undefined, "normal");
+
+    const textoObservacao = doc.splitTextToSize(
+      pedido.observacoes,
+      180
+    );
+
+    doc.text(
+      textoObservacao,
+      10,
+      posicaoObservacao + 7
+    );
+  }
+  
   // ===== SALVAR =====
   doc.save(`Pedido_${pedido.cliente}.pdf`);
 }
