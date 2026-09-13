@@ -426,30 +426,57 @@ doc.autoTable({
     { align: "right" }
   );
 
-  // ===== OBSERVAÇÕES GERAIS =====
+  // ===== INFORMAÇÕES ADICIONAIS =====
   if (pedido.observacoes && pedido.observacoes.trim() !== "") {
 
-    const posicaoObservacao = posicaoTotal + 12;
+    const inicioCaixa = posicaoTotal + 10;
+    const larguraCaixa = 190;
+    const margemInterna = 5;
 
+    // Quebra o texto automaticamente
+    doc.setFontSize(10);
+    doc.setFont(undefined, "normal");
+
+    const textoInfo = doc.splitTextToSize(
+      pedido.observacoes.trim(),
+      larguraCaixa - (margemInterna * 2)
+    );
+
+    // Altura automática da caixa
+    const alturaCaixa = 14 + (textoInfo.length * 5);
+
+    // Título
     doc.setFontSize(11);
     doc.setFont(undefined, "bold");
 
-    doc.text("OBSERVAÇÕES GERAIS:", 10, posicaoObservacao);
+    doc.text(
+      "INFORMAÇÕES ADICIONAIS",
+      15,
+      inicioCaixa + 8
+    );
 
+    // Caixa
+    doc.setDrawColor(120, 120, 120);
+    doc.setLineWidth(0.4);
+
+    doc.rect(
+      10,
+      inicioCaixa,
+      larguraCaixa,
+      alturaCaixa
+    );
+
+    // Texto
+    doc.setFontSize(10);
     doc.setFont(undefined, "normal");
 
-    const textoObservacao = doc.splitTextToSize(
-      pedido.observacoes,
-      180
-    );
-
     doc.text(
-      textoObservacao,
-      10,
-      posicaoObservacao + 7
+      textoInfo,
+      15,
+      inicioCaixa + 16
     );
   }
-  
+
   // ===== SALVAR =====
   doc.save(`Pedido_${pedido.cliente}.pdf`);
 }
