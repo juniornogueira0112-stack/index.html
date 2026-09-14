@@ -368,12 +368,12 @@ const tabela = [];
 
 pedido.itens.forEach(item => {
   // linha principal do produto
-  tabela.push([
-    item.codigo || "",
-    item.nome,
-    item.qtd,
-    `R$ ${item.preco.toFixed(2)}`,
-    `R$ ${(item.preco * item.qtd).toFixed(2)}`
+  tabela.push([ 
+  item.codigo || "", 
+  item.nome, 
+  item.qtd, 
+  formatarMoeda(item.preco), 
+  formatarMoeda(item.preco * item.qtd)
   ]);
 
   // 👇 adiciona observação se existir
@@ -419,11 +419,11 @@ doc.autoTable({
   doc.setFontSize(14);
   doc.setFont(undefined, "bold");
 
-  doc.text(
-    `TOTAL DO PEDIDO: R$ ${total.toFixed(2)}`,
-    200,
-    posicaoTotal,
-    { align: "right" }
+doc.text( 
+  `TOTAL DO PEDIDO: ${formatarMoeda(total)}`, 
+  200, 
+  posicaoTotal, 
+  { align: "right" } 
   );
 
   // ===== INFORMAÇÕES ADICIONAIS =====
