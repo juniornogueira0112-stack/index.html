@@ -358,12 +358,12 @@ function preencherDataHoje() {
   doc.addImage(logo, "PNG", margem, 10, 58, 48);
 
   // Título "DATA DO PEDIDO" alinhado à direita
+
   doc.setTextColor(...MARROM_ESCURO);
   doc.setFont("helvetica","normal");
   doc.setFontSize(10);
   doc.text("DATA DO PEDIDO", 200, 25, { align: "right" });
 
-  // Data em destaque logo abaixo
   doc.setFont("helvetica","bold");
   doc.setFontSize(14);
   doc.text(dataBR(pedido.data), 200, 32, { align: "right" });
@@ -371,52 +371,49 @@ function preencherDataHoje() {
 // ============================
 // DADOS DO CLIENTE
 // ============================
-let y = 62;
 
-// Caixa principal
+let y = 50;
+
 doc.setDrawColor(...BORDA);
 doc.setLineWidth(0.3);
-doc.roundedRect(margem, y, largura, 40, 2, 2, "S");
+doc.roundedRect(margem, y, largura, 28, 2, 2, "S");
 
-// Título
 doc.setFillColor(...CREME);
-doc.rect(margem, y, largura, 8, "F");
+doc.rect(margem, y, largura, 7, "F");
 doc.setTextColor(...MARROM_ESCURO);
 doc.setFont("helvetica","bold");
-doc.setFontSize(11);
-doc.text("DADOS DO CLIENTE", 15, y + 5.5);
+doc.setFontSize(10);
+doc.text("DADOS DO CLIENTE", 15, y + 5);
 
-y += 12;
-
-// Configuração de estilo
+y += 10;
 doc.setFont("helvetica","normal");
 doc.setFontSize(9);
 doc.setTextColor(90,80,72);
-
-// Linhas pontilhadas internas
-doc.setLineDash([1, 1], 0); // define pontilhado
+doc.setLineDash([1, 1], 0);
 
 // Cliente / CPF
 doc.text("Cliente:", 15, y);
-doc.text(String(pedido.cliente || "-"), 40, y);
+doc.text(String(pedido.cliente || "-"), 45, y);
 doc.text("CPF/CNPJ:", 110, y);
 doc.text(String(pedido.doc || "-"), 150, y);
-doc.line(margem, y+3, margem+largura, y+3);
+doc.line(margem, y+2, margem+largura, y+2);
 
 // Cidade / Pagamento
-y += 10;
+y += 8;
 doc.text("Cidade:", 15, y);
-doc.text(String(pedido.cidade || "-"), 40, y);
+doc.text(String(pedido.cidade || "-"), 45, y);
 doc.text("Forma de Pagamento:", 110, y);
 doc.text(String(pedido.pagamento || "-"), 160, y);
-doc.line(margem, y+3, margem+largura, y+3);
+doc.line(margem, y+2, margem+largura, y+2);
 
 // Vendedor
-y += 10;
+y += 8;
 doc.text("Vendedor:", 15, y);
-doc.text(String(pedido.vendedor || "-"), 40, y);
-doc.line(margem, y+3, margem+largura, y+3);
+doc.text(String(pedido.vendedor || "-"), 45, y);
+doc.line(margem, y+2, margem+largura, y+2);
 
+doc.setLineDash([], 0);
+    
 // Reset do estilo de linha
 doc.setLineDash([], 0);
     
@@ -428,7 +425,7 @@ doc.setLineDash([], 0);
   doc.setFont("helvetica","bold");
   doc.setFontSize(11);
   doc.text("ITENS DO PEDIDO", 15, y + 5.5);
-  y += 10;
+  y += 15;
 
   const tabela = [];
   pedido.itens.forEach(item => {
