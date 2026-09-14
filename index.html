@@ -523,8 +523,23 @@ async function enviarPedido() {
 
     if(itens.length===0){alert("Selecione pelo menos um produto."); return;}
 
-    const pedido={cliente,doc:docCampo,vendedor,cidade,pagamento,data:dataPedido,observacoes,itens};
+   let total = 0;
+itens.forEach(item => {
+  total += item.preco * item.qtd;
+});
 
+const pedido = {
+  cliente,
+  doc: docCampo,
+  vendedor,
+  cidade,
+  pagamento,
+  data: dataPedido,
+  observacoes,
+  itens,
+  total   // <-- agora o total vai junto
+};
+    
     gerarPDF(pedido);
 
     await fetch("https://script.google.com/macros/s/AKfycbwfkegXj_ZUuqTOE_lrC_E31-YNsQp6euznpBy02ab6unrcfheiu9_r78-9pM0YWncZ/exec",{
