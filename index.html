@@ -336,9 +336,13 @@ function preencherDataHoje() {
     catch { return "-"; }
   }
 
-    function formatarMoeda(valor) {
+  function formatarMoeda(valor) {
   if (typeof valor !== "number" || isNaN(valor)) return "-";
-  return valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  return valor.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    minimumFractionDigits: 2
+  });
 }
 
   // CORES
@@ -537,7 +541,7 @@ const pedido = {
   data: dataPedido,
   observacoes,
   itens,
-  total   // <-- agora o total vai junto
+  total 
 };
     
     gerarPDF(pedido);
