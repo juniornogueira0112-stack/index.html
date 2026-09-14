@@ -320,8 +320,9 @@ function preencherDataHoje() {
 
   document.getElementById("data").value = dataFormatada;
 }
-
+  // ============================
   //GERAR PEDIDO PDF
+  // ============================
   function gerarPDF(pedido){
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation:"portrait", unit:"mm", format:"a4" });
@@ -355,20 +356,17 @@ function preencherDataHoje() {
   // CABEÇALHO
   // ============================
   doc.addImage(logo, "PNG", margem, 10, 58, 48);
+
+  // Título "DATA DO PEDIDO" alinhado à direita
   doc.setTextColor(...MARROM_ESCURO);
   doc.setFont("helvetica","normal");
   doc.setFontSize(10);
+  doc.text("DATA DO PEDIDO", 200, 25, { align: "right" });
 
+  // Data em destaque logo abaixo
   doc.setFont("helvetica","bold");
-  doc.setFontSize(23);
-
-  doc.setFont("helvetica","normal");
-  doc.setFontSize(10);
-  doc.text("DATA DO PEDIDO", 140, 40);
-
-  doc.setFont("helvetica","bold");
-  doc.setFontSize(12);
-  doc.text(dataBR(pedido.data), 140, 47);
+  doc.setFontSize(14);
+  doc.text(dataBR(pedido.data), 200, 32, { align: "right" });
 
   // ============================
   // DADOS DO CLIENTE
