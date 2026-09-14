@@ -368,50 +368,57 @@ function preencherDataHoje() {
   doc.setFontSize(14);
   doc.text(dataBR(pedido.data), 200, 32, { align: "right" });
 
-  // ============================
+// ============================
 // DADOS DO CLIENTE
 // ============================
 let y = 62;
 
-doc.setFillColor(...CREME);
-doc.roundedRect(margem, y, largura, 8, 1, 1, "F");
+// Caixa principal
+doc.setDrawColor(...BORDA);
+doc.setLineWidth(0.3);
+doc.roundedRect(margem, y, largura, 40, 2, 2, "S");
 
+// Título
+doc.setFillColor(...CREME);
+doc.rect(margem, y, largura, 8, "F");
 doc.setTextColor(...MARROM_ESCURO);
 doc.setFont("helvetica","bold");
 doc.setFontSize(11);
 doc.text("DADOS DO CLIENTE", 15, y + 5.5);
 
-y += 15;
+y += 12;
 
-// Caixa maior para os dados
-doc.setDrawColor(...BORDA);
-doc.setLineWidth(0.3);
-doc.roundedRect(margem, y, largura, 40, 1, 1, "S");
-
-// Linhas internas para separar os campos
-doc.line(margem, y+10, margem+largura, y+10); // separa Cliente / CPF
-doc.line(margem, y+20, margem+largura, y+20); // separa Cidade / Pagamento
-doc.line(margem, y+30, margem+largura, y+30); // separa Vendedor
-
-// Labels
+// Configuração de estilo
 doc.setFont("helvetica","normal");
 doc.setFontSize(9);
 doc.setTextColor(90,80,72);
-doc.text("Cliente:", 15, y+7);
-doc.text("CPF/CNPJ:", 110, y+7);
-doc.text("Cidade:", 15, y+17);
-doc.text("Forma de Pagamento:", 110, y+17);
-doc.text("Vendedor:", 15, y+27);
 
-// Valores
-doc.setFont("helvetica","bold");
-doc.setFontSize(10);
-doc.setTextColor(...MARROM_ESCURO);
-doc.text(String(pedido.cliente || "-"), 15, y+12);
-doc.text(String(pedido.doc || "-"), 110, y+12);
-doc.text(String(pedido.cidade || "-"), 15, y+22);
-doc.text(String(pedido.pagamento || "-"), 110, y+22);
-doc.text(String(pedido.vendedor || "-"), 15, y+32);
+// Linhas pontilhadas internas
+doc.setLineDash([1, 1], 0); // define pontilhado
+
+// Cliente / CPF
+doc.text("Cliente:", 15, y);
+doc.text(String(pedido.cliente || "-"), 40, y);
+doc.text("CPF/CNPJ:", 110, y);
+doc.text(String(pedido.doc || "-"), 150, y);
+doc.line(margem, y+3, margem+largura, y+3);
+
+// Cidade / Pagamento
+y += 10;
+doc.text("Cidade:", 15, y);
+doc.text(String(pedido.cidade || "-"), 40, y);
+doc.text("Forma de Pagamento:", 110, y);
+doc.text(String(pedido.pagamento || "-"), 160, y);
+doc.line(margem, y+3, margem+largura, y+3);
+
+// Vendedor
+y += 10;
+doc.text("Vendedor:", 15, y);
+doc.text(String(pedido.vendedor || "-"), 40, y);
+doc.line(margem, y+3, margem+largura, y+3);
+
+// Reset do estilo de linha
+doc.setLineDash([], 0);
     
   // ============================
   // ITENS DO PEDIDO
