@@ -336,10 +336,10 @@ function preencherDataHoje() {
     catch { return "-"; }
   }
 
-  function formatarMoeda(valor) {
-    if (typeof valor !== "number" || isNaN(valor)) return "-";
-    return "R$ " + valor.toFixed(2).replace(".", ",");
-  }
+    function formatarMoeda(valor) {
+  if (typeof valor !== "number" || isNaN(valor)) return "-";
+  return valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
 
   // CORES
   const MARROM = [111, 67, 37];
